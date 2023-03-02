@@ -1,13 +1,13 @@
-# PRACTICA 1
+# PRACTICA 1 - Pol Raich i Víctor Pallás
 
-## BLINK 
+## 1. BLINK 
 
 El objetivo de la práctica es producir el parpadeo periódico de un led. 
 Se utilizará la salida serie para depurar el programa
 
 Para ello utilizaremos el microcontrolador ESP32-WROOM-32
 
-### FUNCIONALIDAD DE LA PRACTICA
+### 1.1 FUNCIONALIDAD DE LA PRACTICA
 
 1. Iniciar pin de led como salida 
 2. Iniciar el terminal serie 
@@ -19,9 +19,10 @@ Para ello utilizaremos el microcontrolador ESP32-WROOM-32
     * sacar por puesto serie mensaje *OFF*
     * espera de 500 milisegundos
 
-### CÓDIGO
+### 1.2 CÓDIGO
 
-'#include <Arduino.h>
+~~~~
+#include <Arduino.h>
 
 int PIN_RED_LED = 22;
 int PIN_BLUE_LED = 19;
@@ -59,28 +60,30 @@ void loop() {
   digitalWrite(PIN_YELLOW_LED, LOW);
   Serial.println("LED YELLOW OFF");
   delay(500);
-}'
+}
+~~~~
 
-### DIAGRAMA
+### 1.3 DIAGRAMA
 
-![]https://i.ibb.co/35KHCQp/Blink-Flux-Diagram.jpg
+![](https://i.ibb.co/35KHCQp/Blink-Flux-Diagram.jpg)
 
-### PREGUNTA A RESPONDER
+### 1.4 PREGUNTA A RESPONDER
 
-*Responder a la siguiente pregunta en el programa que se ha realizado cual es el tiempo libre que tiene el procesador ?*
+***Responder a la siguiente pregunta en el programa que se ha realizado cual es el tiempo libre que tiene el procesador ?***
 
-·Si entendemos el tiempo libre del procesador como el tiempo en el que no ejecuta ningunta instrucción, debido al uso del comando delay() cada loop tenemos al procesador bloqueado 3 segundos en total...
+*Si entendemos el tiempo libre del procesador como el tiempo en el que no ejecuta ningunta instrucción, debido al uso del comando delay() cada loop tenemos al procesador bloqueado 3 segundos en total...*
 
-## EJERCICIO VOLUNTARIO DE MEJORA DE NOTA
+## 2. EJERCICIO VOLUNTARIO DE MEJORA DE NOTA
 
 El sensor de temperatura interno de la ESP32 no funciona correctamente y los valores que podemos leer son siempre el mismo o varia muy poco y mal.
 
 Hemos decidido a cambio utilizar un sensor de temperatura analógico modelo *KY-013*.
 El valor de temperatura medido lo mostraremos por la salida serie y además utilizaremos los conocimientos de la parte anterior de la práctica para encender unos leds de colores dependiendo de la temperatura que lea el sensor.
 
-### CÓDIGO
+### 2.1 CÓDIGO
 
-'#include <Arduino.h>
+~~~~
+#include <Arduino.h>
 #include <math.h>
 //SENSOR DE TEMPERATURA ANALÓGICO KY-013
 
@@ -178,8 +181,9 @@ void loop()
     }
  }
  delay(500);
-}'
+}
+~~~~
 
-### VÍDEO DEL FUNCIONAMIENTO
+### 2.2 VÍDEO DEL FUNCIONAMIENTO
 
-[Vídeo](https://youtu.be/gLyc7qnZTN4)
+[Link Vídeo](https://youtu.be/gLyc7qnZTN4)
