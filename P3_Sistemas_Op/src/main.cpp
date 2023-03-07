@@ -9,10 +9,10 @@ void led1on( void * parameter )
 for(;;)
 {
 digitalWrite(led1, HIGH);
-vTaskDelay(2000 / portTICK_PERIOD_MS);
+vTaskDelay(500 / portTICK_PERIOD_MS);
 digitalWrite(led1, LOW);
 Serial.println("APAGANT: LED1 \n ENCENENT: LED2");
-vTaskDelay(2000 / portTICK_PERIOD_MS);
+vTaskDelay(500 / portTICK_PERIOD_MS);
 
 }
 /* delete a task when finish,
@@ -55,7 +55,7 @@ led2on, // Task function.
 "led2on", // name of task. 
 10000, // Stack size of task 
 NULL, // parameter of the task 
-0, // priority of the task 
+1, // priority of the task 
 NULL); //Task handle to keep track of created task 
 }
 void loop()
