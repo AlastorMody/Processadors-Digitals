@@ -1,9 +1,9 @@
 # PRACTICA 2 - VÍCTOR PALLÁS I POL RAICH
 
 ## FUNCIONAMENT DE LA PRIMERA PART DE LA PRÀCTICA
-Primerament declarem una estructura de boto, en la qual tenim que assignar-li un pin de sortida, un nombre de vegades pressionat el boto, i si esta pressionat el boto.
+Primerament declarem una estructura de ó, en la qual tenim que assignar-li un pin de sortida, un nombre de vegades pressionat el botó, i si esta pressionat el boto.
 
-El "void IRAM_ATTR isr" fa que per cada vegada que es premi el botó augmenti en 1 el nombre de vegades que ha estat premut i posi el estat de el botó en "true".
+El "void IRAM_ATTR isr" fa que per cada vegada que es premi el botó augmenti en 1 el nombre de vegades que ha estat premut i posi el estat de el botó en "true"
 
 En el setup assignem el pin, per el qual volem que faci el "attachInterrupt" i en la manera que volem que el faci, en aquest cas "FALLING" que fa que s'interrompi quan el pin va de "HIGH" a "LOW" .
 
