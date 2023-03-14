@@ -1,7 +1,7 @@
 # PRACTICA 2 - VÍCTOR PALLÁS I POL RAICH
 
 ## FUNCIONAMENT DE LA PRIMERA PART DE LA PRÀCTICA
-Primerament declarem una estructura de ó, en la qual tenim que assignar-li un pin de sortida, un nombre de vegades pressionat el botó, i si esta pressionat el boto.
+Primerament declarem una estructura de botó, en la qual tenim que assignar-li un pin de sortida, un nombre de vegades pressionat el botó, i si esta pressionat el boto.
 
 El "void IRAM_ATTR isr" fa que per cada vegada que es premi el botó augmenti en 1 el nombre de vegades que ha estat premut i posi el estat de el botó en "true"
 
