@@ -1,4 +1,4 @@
-/*#include <Arduino.h>
+#include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -61,4 +61,4 @@ Serial.println("No I2C devices found\n");
 else
 Serial.println("done\n");
 delay(5000); // wait 5 seconds for next scan
-}*/
+}
