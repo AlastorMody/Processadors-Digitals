@@ -30,17 +30,27 @@ WebServer server(80);
 /*
    Declaramos el estado inicial de los LEDs del ESP32
 */
-uint8_t LED1pin = 12;
-bool LED1Estado = LOW;
-uint8_t LED2pin = 14;
-bool LED2Estado = LOW;
-uint8_t LED3pin = 27;
-bool LED3Estado = LOW;
+bool LedSectorAStat = LOW;
+uint8_t LEDA1pin = 14;
+bool LEDA1Estado = LOW;
+uint8_t LEDA2pin = 12;
+bool LEDA2Estado = LOW;
+uint8_t LEDA3pin = 13;
+bool LEDA3Estado = LOW;
+
+
+bool LedSectorBStat = LOW;
+uint8_t LEDB1pin = 2;
+bool LEDB1Estado = LOW;
+uint8_t LEDB2pin = 4;
+bool LEDB2Estado = LOW;
+uint8_t LEDB3pin = 16;
+bool LEDB3Estado = LOW;
  
 /*
    Aqui esta definido todo el HTML y el CSS del servidor WEB con ESP32
 */
-String SendHTML(uint8_t led1stat, uint8_t led2stat, uint8_t led3stat) {
+String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta) {
   // Cabecera de todas las paginas WEB
   String ptr = "<!DOCTYPE html> <html>\n";
   
@@ -55,57 +65,77 @@ String SendHTML(uint8_t led1stat, uint8_t led2stat, uint8_t led3stat) {
  */
   ptr += "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto;}\n";
   ptr += "body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
-  ptr += ".button {display: block;width: 80px;text-align: center;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
+  ptr += "div#left{float: left; margin-left: 200px;}\n";
+  ptr += "div#right{float: right; margin-right: 200px;}\n";
+  ptr += "div#continuacio{clear: both;}\n";
+  ptr += ".button {width: 50px;text-align: center;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 18px;cursor: pointer;margin: 0px auto 20px;border-radius: 4px;transition-duration: 0.4s;}\n";
   ptr += ".button-on {background-color: #3498db;}\n";
   ptr += ".button-on:active {background-color: #2980b9;}\n";
   ptr += ".button-off {background-color: #34495e;}\n";
   ptr += ".button-off:active {background-color: #2c3e50;}\n";
-  ptr += "p {text-align: center;font-size: 14px;color: #888;margin-bottom: 10px;}\n";
+  ptr += "h1{text-align: center;}\n";
+  ptr += "h3{text-align: center;}\n";
+  ptr += "h5{font-size: 14px;color: #888;}\n";
+  ptr += "h4{font-size: 16px; color #888; margin: 5px;}\n";
+  ptr += "fieldset{text-align:center; color: black; border: solid 2px black;}\n";
   ptr += "</style>\n";
   ptr += "</head>\n";
   ptr += "<body>\n";
   /*
    * Encabezados de la pagina
    */
+  ptr += "<div id=\"header\">\n";
   ptr += "<h1 align=\"center\">ESP32 Servidor WEB</h1>\n";
   ptr += "<h3 align=\"center\">Usando Modo Estacion</h3>\n";
+  ptr += "</div>\n";
 /*
  * Aqui esta la inteligencia del servidor WEB con ESP32, dependiento de los parametros de la funcion SendHTML
  * modificara la vista de la pagina WEB,  llamaran a las clases "button-on y button-off" que cambian como
  * se muestran los datos en la pagina WEB 
  */
-  if (led1stat)
+if (targeta == "ab540d41")
+{
+  ptr += "<fieldset><fieldset><h4>Luces</h4></fieldset>\n";
+  
+  ptr += "<div id=\"left\">\n";
+  ptr += "<h5>Led's Sector A</h5>\n";
+  if (LedSectorAStat)
   {
-    ptr += "<p>LED1 Estado: ON</p><a class=\"button button-off\" href=\"/led1off\">OFF</a>";
+    ptr += "<a class=\"button button-on\" href=\"/LedSectorAoff\">ON</a>";
   }
   else
   {
-    ptr += "<p>LED1 Estado: OFF</p><a class=\"button button-on\" href=\"/led1on\">ON</a>";
+    ptr += "<a class=\"button button-off\" href=\"/LedSectorAon\">OFF</a>";
   }
- 
-  if (led2stat)
-  {
-    ptr += "<p>LED2 Estado: ON</p><a class=\"button button-off\" href=\"/led2off\">OFF</a>";
-  }
-  else
-  {
-    ptr += "<p>LED2 Estado: OFF</p><a class=\"button button-on\" href=\"/led2on\">ON</a>";
-  }
- 
-  if (led3stat)
-  {
-    ptr += "<p>LED3 Estado: ON</p><a class=\"button button-off\" href=\"/led3off\">OFF</a>";
-  }
-  else
-  {
-    ptr += "<p>LED3 Estado: OFF</p><a class=\"button button-on\" href=\"/led3on\">ON</a>";
-  }
- 
+  ptr += "</div>\n";
 
+  ptr += "<div id=\"right\">\n";
+  ptr += "<h5>Led's Sector B</h5>\n";
+  if (LedSectorBStat)
+  {
+    ptr += "<a class=\"button button-on\" href=\"/LedSectorBoff\">ON</a>";
+  }
+  else
+  {
+    ptr += "<a class=\"button button-off\" href=\"/LedSectorBon\">OFF</a>";
+  }
+  ptr += "</div>\n";
+  ptr += "</fieldset>\n";
+
+  ptr += "<div id=\"continuacio\">\n";
+  ptr += "<span>Mi Web</span>\n";
+  ptr += "</div>\n";
+ 
+}
+else 
+{
+  ptr += "<fieldset><h4>Targeta no reconeguda</fieldset>";
+}
   ptr += "</body>\n";
   ptr += "</html>\n";
   return ptr;
 }
+
 
 
 /*
@@ -117,47 +147,52 @@ String SendHTML(uint8_t led1stat, uint8_t led2stat, uint8_t led3stat) {
    del servidor WEB con Arduino.
 */
 void handle_OnConnect() {
-  LED1Estado = LOW; // 1
-  LED2Estado = LOW; // 1
-  LED3Estado = LOW; // 1
+  LEDA1Estado = LOW; // 1
+  LEDA2Estado = LOW; // 1
+  LEDA3Estado = LOW;
+  LEDB1Estado = LOW;
+  LEDB2Estado = LOW;
+  LEDB3Estado = LOW;
+  LedSectorAStat = LOW;
+  LedSectorBStat = LOW;
   Serial.println("GPIO4 Estado: OFF | GPIO5 Estado: OFF"); // 2
-  server.send(200, "text/html", SendHTML(LED1Estado, LED2Estado, LED3Estado)); // 3
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta)); // 3
 }
  
-void handle_led1on() {
-  LED1Estado = HIGH; //1
+void handle_LedSectorAon() {
+  LEDA1Estado = HIGH; // 1
+  LEDA2Estado = HIGH; // 1
+  LEDA3Estado = HIGH;
+  LedSectorAStat = HIGH;
   Serial.println("GPIO4 Estado: ON"); // 2
-  server.send(200, "text/html", SendHTML(true, LED2Estado, LED3Estado)); //3
+  server.send(200, "text/html", SendHTML(true, LedSectorBStat, targeta)); //3
 }
  
-void handle_led1off() {
-  LED1Estado = LOW;
+void handle_LedSectorAoff() {
+  LEDA1Estado = LOW; // 1
+  LEDA2Estado = LOW; // 1
+  LEDA3Estado = LOW;
+  LedSectorAStat = LOW;
   Serial.println("GPIO4 Estado: OFF");
-  server.send(200, "text/html", SendHTML(false, LED2Estado, LED3Estado));
+  server.send(200, "text/html", SendHTML(false, LedSectorBStat, targeta));
 }
  
-void handle_led2on() {
-  LED2Estado = HIGH;
+void handle_LedSectorBon() {
+  LEDB1Estado = HIGH;
+  LEDB2Estado = HIGH;
+  LEDB3Estado = HIGH;
+  LedSectorBStat = HIGH;
   Serial.println("GPIO5 Estado: ON");
-  server.send(200, "text/html", SendHTML(LED1Estado, true, LED3Estado));
+  server.send(200, "text/html", SendHTML(LedSectorAStat, true, targeta));
 }
  
-void handle_led2off() {
-  LED2Estado = LOW;
+void handle_LedSectorBoff() {
+  LEDB1Estado = LOW;
+  LEDB2Estado = LOW;
+  LEDB3Estado = LOW;
+  LedSectorBStat = LOW;
   Serial.println("GPIO5 Estado: OFF");
-  server.send(200, "text/html", SendHTML(LED1Estado, false, LED3Estado));
-}
-
-void handle_led3on() {
-  LED3Estado = HIGH;
-  Serial.println("LED3 Estado: ON");
-  server.send(200, "text/html", SendHTML(LED1Estado, LED2Estado, true));
-}
- 
-void handle_led3off() {
-  LED3Estado = LOW;
-  Serial.println("GPIO5 Estado: OFF");
-  server.send(200, "text/html", SendHTML(LED1Estado, LED2Estado, false));
+  server.send(200, "text/html", SendHTML(LedSectorAStat, false, targeta));
 }
  
 void handle_NotFound() {
@@ -170,9 +205,12 @@ void setup() {
    * Configura el comportamiento de los pines
    */
   Serial.begin(115200);
-  pinMode(LED1pin, OUTPUT);
-  pinMode(LED2pin, OUTPUT);
-  pinMode(LED3pin, OUTPUT);
+  pinMode(LEDA1pin, OUTPUT);
+  pinMode(LEDA2pin, OUTPUT);
+  pinMode(LEDA3pin, OUTPUT);
+  pinMode(LEDB1pin, OUTPUT);
+  pinMode(LEDB2pin, OUTPUT);
+  pinMode(LEDB3pin, OUTPUT);
 /*
 * BUS SPI del RFID
 */
@@ -205,12 +243,10 @@ void setup() {
  * esta pagina no existe, por lo tanto actualizara la pagina WEB con un mensaje de error
  */
   server.on("/", handle_OnConnect); // 1
-  server.on("/led1on", handle_led1on); // 2
-  server.on("/led1off", handle_led1off); // 2
-  server.on("/led2on", handle_led2on); // 2
-  server.on("/led2off", handle_led2off); // 2
-  server.on("/led3on", handle_led3on); // 2
-  server.on("/led3off", handle_led3off);// 2
+  server.on("/LedSectorAon", handle_LedSectorAon); // 2
+  server.on("/LedSectorAoff", handle_LedSectorAoff); // 2
+  server.on("/LedSectorBon", handle_LedSectorBon); // 2
+  server.on("/LedSectorBoff", handle_LedSectorBoff); // 2
   server.onNotFound(handle_NotFound); // 3
 /*
  * Arrancamos el Servicio WEB
@@ -234,48 +270,58 @@ void loop() {
   		//Seleccionamos una tarjeta
             if ( mfrc522.PICC_ReadCardSerial()) 
             {
+              String tar;
+              tar = "";
+              targeta = "";
                   // Enviamos serialemente su UID
                   Serial.print("Card UID:");
                   for (byte i = 0; i < mfrc522.uid.size; i++) {
                           Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
                           Serial.print(mfrc522.uid.uidByte[i], HEX);
-                          targeta[i]=(mfrc522.uid.uidByte[i] < 0x10 ? '0' : ' ');
-                          targeta[i]=mfrc522.uid.uidByte[i],HEX;
+                          tar += String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+                          tar += String(mfrc522.uid.uidByte[i], HEX);
                           
                   } 
                   Serial.println();
+                  for (int i = 0; i < tar.length(); i++)
+                  {
+                    if(tar[i] == ' '){}
+                    else {
+                      targeta += tar[i];
+                    }
+                  }
                   Serial.print("Carda v2:");
                   Serial.print(targeta);
+                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta));
                   // Terminamos la lectura de la tarjeta  actual
                   mfrc522.PICC_HaltA();         
             }      
 	}
 
 
-  if (LED1Estado)
+  if (LedSectorAStat)
   {
-    digitalWrite(LED1pin, HIGH);
+    digitalWrite(LEDA1pin, HIGH);
+    digitalWrite(LEDA2pin, HIGH);
+    digitalWrite(LEDA3pin, HIGH);
   }
   else
   {
-    digitalWrite(LED1pin, LOW);
+    digitalWrite(LEDA1pin, LOW);
+    digitalWrite(LEDA2pin, LOW);
+    digitalWrite(LEDA3pin, LOW);
   }
  
-  if (LED2Estado)
+  if (LedSectorBStat)
   {
-    digitalWrite(LED2pin, HIGH);
+    digitalWrite(LEDB1pin, HIGH);
+    digitalWrite(LEDB2pin, HIGH);
+    digitalWrite(LEDB3pin, HIGH);
   }
   else
   {
-    digitalWrite(LED2pin, LOW);
-  }
-
-  if (LED3Estado)
-  {
-    digitalWrite(LED3pin, HIGH);
-  }
-  else
-  {
-    digitalWrite(LED3pin, LOW);
+    digitalWrite(LEDB1pin, LOW);
+    digitalWrite(LEDB2pin, LOW);
+    digitalWrite(LEDB3pin, LOW);
   }
 }
