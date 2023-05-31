@@ -7,12 +7,34 @@
 #include <WebServer.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
+
+/*
+* Sensor BMP280
+*/
+Adafruit_BMP280 bmp280;
+float temperatura;
+
+/*
+* Display
+*/
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+
 
 /*
   Pins para el lector RFID
 */
-#define RST_PIN	26    //Pin 9 para el reset del RC522
-#define SS_PIN	21   //Pin 10 para el SS (SDA) del RC522
+#define RST_PIN	26    //Pin 26 para el reset del RC522
+#define SS_PIN	5   //Pin 5 para el SS (SDA) del RC522
 MFRC522 mfrc522(SS_PIN, RST_PIN); //Creamos el objeto para el RC522
 String targeta;
 
@@ -50,7 +72,7 @@ bool LEDB3Estado = LOW;
 /*
    Aqui esta definido todo el HTML y el CSS del servidor WEB con ESP32
 */
-String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta) {
+String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, float temperatura) {
   // Cabecera de todas las paginas WEB
   String ptr = "<!DOCTYPE html> <html>\n";
   
@@ -146,6 +168,11 @@ else
    de la conexion y llama a otra funcion SendHTML con dos parametros que modificaran la pagina 
    del servidor WEB con Arduino.
 */
+
+void leer_bmp280(){
+  temperatura = bmp280.readTemperature();
+}
+
 void handle_OnConnect() {
   LEDA1Estado = LOW; // 1
   LEDA2Estado = LOW; // 1
@@ -155,8 +182,9 @@ void handle_OnConnect() {
   LEDB3Estado = LOW;
   LedSectorAStat = LOW;
   LedSectorBStat = LOW;
+  leer_bmp280;
   Serial.println("GPIO4 Estado: OFF | GPIO5 Estado: OFF"); // 2
-  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta)); // 3
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura)); // 3
 }
  
 void handle_LedSectorAon() {
@@ -164,8 +192,9 @@ void handle_LedSectorAon() {
   LEDA2Estado = HIGH; // 1
   LEDA3Estado = HIGH;
   LedSectorAStat = HIGH;
+  leer_bmp280;
   Serial.println("GPIO4 Estado: ON"); // 2
-  server.send(200, "text/html", SendHTML(true, LedSectorBStat, targeta)); //3
+  server.send(200, "text/html", SendHTML(true, LedSectorBStat, targeta, temperatura)); //3
 }
  
 void handle_LedSectorAoff() {
@@ -173,8 +202,9 @@ void handle_LedSectorAoff() {
   LEDA2Estado = LOW; // 1
   LEDA3Estado = LOW;
   LedSectorAStat = LOW;
+  leer_bmp280;
   Serial.println("GPIO4 Estado: OFF");
-  server.send(200, "text/html", SendHTML(false, LedSectorBStat, targeta));
+  server.send(200, "text/html", SendHTML(false, LedSectorBStat, targeta, temperatura));
 }
  
 void handle_LedSectorBon() {
@@ -182,8 +212,9 @@ void handle_LedSectorBon() {
   LEDB2Estado = HIGH;
   LEDB3Estado = HIGH;
   LedSectorBStat = HIGH;
+  leer_bmp280;
   Serial.println("GPIO5 Estado: ON");
-  server.send(200, "text/html", SendHTML(LedSectorAStat, true, targeta));
+  server.send(200, "text/html", SendHTML(LedSectorAStat, true, targeta, temperatura));
 }
  
 void handle_LedSectorBoff() {
@@ -191,8 +222,9 @@ void handle_LedSectorBoff() {
   LEDB2Estado = LOW;
   LEDB3Estado = LOW;
   LedSectorBStat = LOW;
+  leer_bmp280;
   Serial.println("GPIO5 Estado: OFF");
-  server.send(200, "text/html", SendHTML(LedSectorAStat, false, targeta));
+  server.send(200, "text/html", SendHTML(LedSectorAStat, false, targeta, temperatura));
 }
  
 void handle_NotFound() {
@@ -216,6 +248,31 @@ void setup() {
 */
   SPI.begin();
   mfrc522.PCD_Init();
+
+/*
+* Configuracion del Display
+*/
+if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
+  }
+  display.clearDisplay();
+  display.println("\nTarget ID: ");
+
+/*
+* configuracio BMP280
+*/
+if (!bmp280.begin(0x76,0x58)) {
+Serial.println("Could not find a valid BMP280 sensor, check wiring!");
+while (1);
+}
+bmp280.setSampling(Adafruit_BMP280::MODE_FORCED,     // Operating Mode. 
+                   Adafruit_BMP280::SAMPLING_X2,     // Temp. oversampling 
+                   Adafruit_BMP280::SAMPLING_X16,    // Pressure oversampling 
+                   Adafruit_BMP280::FILTER_X16,      // Filtering. 
+                   Adafruit_BMP280::STANDBY_MS_500); // Standby time. 
+leer_bmp280();
+
 /*
  * Configuracion de la conexion a la Wifi de tu casa
  */
@@ -253,6 +310,7 @@ void setup() {
  */
   server.begin();
   Serial.println("Servidor HTTP iniciado");
+
 }
 /*
  * Para gestionar las la peticiones HTTP es necesario llamar al metodo "handleClient"
@@ -274,10 +332,7 @@ void loop() {
               tar = "";
               targeta = "";
                   // Enviamos serialemente su UID
-                  Serial.print("Card UID:");
                   for (byte i = 0; i < mfrc522.uid.size; i++) {
-                          Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-                          Serial.print(mfrc522.uid.uidByte[i], HEX);
                           tar += String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
                           tar += String(mfrc522.uid.uidByte[i], HEX);
                           
@@ -290,11 +345,26 @@ void loop() {
                       targeta += tar[i];
                     }
                   }
-                  Serial.print("Carda v2:");
-                  Serial.print(targeta);
-                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta));
+                  leer_bmp280;
+                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura));
                   // Terminamos la lectura de la tarjeta  actual
-                  mfrc522.PICC_HaltA();         
+                  mfrc522.PICC_HaltA();  
+
+                  display.setTextSize(1);
+                  display.setTextColor(WHITE);
+                  display.setCursor(0, 10);
+                  display.clearDisplay();
+                  if (targeta =="ab540d41"){
+                    display.println("\nUser: Pol");
+                  }
+                  else {
+                    display.println("\nUser: Unknown");
+                  }
+                  display.print("\n\nID: ");
+                  display.print(targeta);
+                  display.display();
+
+                  Serial.print(temperatura);
             }      
 	}
 
