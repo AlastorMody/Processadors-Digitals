@@ -12,6 +12,15 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
+#include <Servo.h> 
+
+/*
+* Motor Servo SG90
+*/
+Servo servo;
+int angle = 60;
+bool EstadoPuerta = LOW;
+
 
 /*
 * Sensor BMP280
@@ -33,7 +42,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 /*
   Pins para el lector RFID
 */
-#define RST_PIN	26    //Pin 26 para el reset del RC522
+#define RST_PIN	27    //Pin 26 para el reset del RC522
 #define SS_PIN	5   //Pin 5 para el SS (SDA) del RC522
 MFRC522 mfrc522(SS_PIN, RST_PIN); //Creamos el objeto para el RC522
 String targeta;
@@ -53,9 +62,7 @@ WebServer server(80);
    Declaramos el estado inicial de los LEDs del ESP32
 */
 bool LedSectorAStat = LOW;
-uint8_t LEDA1pin = 14;
-bool LEDA1Estado = LOW;
-uint8_t LEDA2pin = 12;
+uint8_t LEDA2pin = 14;
 bool LEDA2Estado = LOW;
 uint8_t LEDA3pin = 13;
 bool LEDA3Estado = LOW;
@@ -66,13 +73,13 @@ uint8_t LEDB1pin = 2;
 bool LEDB1Estado = LOW;
 uint8_t LEDB2pin = 4;
 bool LEDB2Estado = LOW;
-uint8_t LEDB3pin = 16;
+uint8_t LEDB3pin = 17;
 bool LEDB3Estado = LOW;
  
 /*
    Aqui esta definido todo el HTML y el CSS del servidor WEB con ESP32
 */
-String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, float temperatura) {
+String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, float temperatura, uint8_t EstadoPuerta) {
   // Cabecera de todas las paginas WEB
   String ptr = "<!DOCTYPE html> <html>\n";
   
@@ -88,7 +95,9 @@ String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, 
   ptr += "<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto;}\n";
   ptr += "body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
   ptr += "div#left{float: left; margin-left: 200px;}\n";
+  ptr += "div#leftl{width: 300px; float: left; margin-left: 75px; margin-top: 20px;}\n";
   ptr += "div#right{float: right; margin-right: 200px;}\n";
+  ptr += "div#rightr{width: 300px; float: right; margin-right: 75px; margin-top: 20px;}\n";
   ptr += "div#continuacio{clear: both;}\n";
   ptr += ".button {width: 50px;text-align: center;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 18px;cursor: pointer;margin: 0px auto 20px;border-radius: 4px;transition-duration: 0.4s;}\n";
   ptr += ".button-on {background-color: #3498db;}\n";
@@ -144,9 +153,26 @@ if (targeta == "ab540d41")
   ptr += "</div>\n";
   ptr += "</fieldset>\n";
 
-  ptr += "<div id=\"continuacio\">\n";
-  ptr += "<span>Mi Web</span>\n";
+  ptr += "<div id=\"leftl\">";
+  ptr += "<fieldset><h4>Temperatura</h4></fieldset>\n";
+  ptr += "<div id=\"leftl\">";
+  ptr += "<a class=\"button button\" href=\"/Temp\">";
+  ptr += temperatura;
+  ptr += " C</a></div>\n";
   ptr += "</div>\n";
+
+  ptr += "<div id=\"rightr\">\n";
+  ptr += "<fieldset><h4>Puerta</h4></fieldset>\n";
+  ptr += "<div id=\"leftl\">\n";
+  if(EstadoPuerta)
+  {
+    ptr += "<a class=\"button button-on\" href=\"PuertaOff\">Abierta</a>";
+  }
+  else
+  {
+    ptr += "<a class=\"button button-off\" href=\"PuertaOn\">Cerrada</a>";
+  }
+  ptr +="</div>\n";
  
 }
 else 
@@ -169,12 +195,24 @@ else
    del servidor WEB con Arduino.
 */
 
-void leer_bmp280(){
-  temperatura = bmp280.readTemperature();
+void handle_PuertaOn() {
+  EstadoPuerta = HIGH;
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, true)); // 3
+}
+
+void handle_PuertaOff() {
+  EstadoPuerta = LOW;
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, false)); // 3
+}
+
+void handle_Temp(){
+  if(bmp280.takeForcedMeasurement()){
+    temperatura=bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, EstadoPuerta)); // 3
 }
 
 void handle_OnConnect() {
-  LEDA1Estado = LOW; // 1
   LEDA2Estado = LOW; // 1
   LEDA3Estado = LOW;
   LEDB1Estado = LOW;
@@ -182,29 +220,30 @@ void handle_OnConnect() {
   LEDB3Estado = LOW;
   LedSectorAStat = LOW;
   LedSectorBStat = LOW;
-  leer_bmp280;
-  Serial.println("GPIO4 Estado: OFF | GPIO5 Estado: OFF"); // 2
-  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura)); // 3
+  if(bmp280.takeForcedMeasurement()){
+    temperatura = bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, EstadoPuerta)); // 3
 }
  
 void handle_LedSectorAon() {
-  LEDA1Estado = HIGH; // 1
   LEDA2Estado = HIGH; // 1
   LEDA3Estado = HIGH;
   LedSectorAStat = HIGH;
-  leer_bmp280;
-  Serial.println("GPIO4 Estado: ON"); // 2
-  server.send(200, "text/html", SendHTML(true, LedSectorBStat, targeta, temperatura)); //3
+  if(bmp280.takeForcedMeasurement()){
+    temperatura = bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(true, LedSectorBStat, targeta, temperatura, EstadoPuerta)); //3
 }
  
 void handle_LedSectorAoff() {
-  LEDA1Estado = LOW; // 1
   LEDA2Estado = LOW; // 1
   LEDA3Estado = LOW;
   LedSectorAStat = LOW;
-  leer_bmp280;
-  Serial.println("GPIO4 Estado: OFF");
-  server.send(200, "text/html", SendHTML(false, LedSectorBStat, targeta, temperatura));
+  if(bmp280.takeForcedMeasurement()){
+    temperatura = bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(false, LedSectorBStat, targeta, temperatura, EstadoPuerta));
 }
  
 void handle_LedSectorBon() {
@@ -212,9 +251,10 @@ void handle_LedSectorBon() {
   LEDB2Estado = HIGH;
   LEDB3Estado = HIGH;
   LedSectorBStat = HIGH;
-  leer_bmp280;
-  Serial.println("GPIO5 Estado: ON");
-  server.send(200, "text/html", SendHTML(LedSectorAStat, true, targeta, temperatura));
+  if(bmp280.takeForcedMeasurement()){
+    temperatura = bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(LedSectorAStat, true, targeta, temperatura, EstadoPuerta));
 }
  
 void handle_LedSectorBoff() {
@@ -222,9 +262,10 @@ void handle_LedSectorBoff() {
   LEDB2Estado = LOW;
   LEDB3Estado = LOW;
   LedSectorBStat = LOW;
-  leer_bmp280;
-  Serial.println("GPIO5 Estado: OFF");
-  server.send(200, "text/html", SendHTML(LedSectorAStat, false, targeta, temperatura));
+  if(bmp280.takeForcedMeasurement()){
+    temperatura = bmp280.readTemperature();
+  }
+  server.send(200, "text/html", SendHTML(LedSectorAStat, false, targeta, temperatura, EstadoPuerta));
 }
  
 void handle_NotFound() {
@@ -237,7 +278,6 @@ void setup() {
    * Configura el comportamiento de los pines
    */
   Serial.begin(115200);
-  pinMode(LEDA1pin, OUTPUT);
   pinMode(LEDA2pin, OUTPUT);
   pinMode(LEDA3pin, OUTPUT);
   pinMode(LEDB1pin, OUTPUT);
@@ -250,6 +290,13 @@ void setup() {
   mfrc522.PCD_Init();
 
 /*
+* Configuracio Motor Porta
+*/
+servo.attach(26);
+servo.write(angle);
+
+
+/*
 * Configuracion del Display
 */
 if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
@@ -257,7 +304,6 @@ if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
     for(;;);
   }
   display.clearDisplay();
-  display.println("\nTarget ID: ");
 
 /*
 * configuracio BMP280
@@ -271,7 +317,6 @@ bmp280.setSampling(Adafruit_BMP280::MODE_FORCED,     // Operating Mode.
                    Adafruit_BMP280::SAMPLING_X16,    // Pressure oversampling 
                    Adafruit_BMP280::FILTER_X16,      // Filtering. 
                    Adafruit_BMP280::STANDBY_MS_500); // Standby time. 
-leer_bmp280();
 
 /*
  * Configuracion de la conexion a la Wifi de tu casa
@@ -304,6 +349,9 @@ leer_bmp280();
   server.on("/LedSectorAoff", handle_LedSectorAoff); // 2
   server.on("/LedSectorBon", handle_LedSectorBon); // 2
   server.on("/LedSectorBoff", handle_LedSectorBoff); // 2
+  server.on("/Temp", handle_Temp); //2
+  server.on("/PuertaOn", handle_PuertaOn); //2
+  server.on("/PuertaOff", handle_PuertaOff); //2
   server.onNotFound(handle_NotFound); // 3
 /*
  * Arrancamos el Servicio WEB
@@ -345,39 +393,49 @@ void loop() {
                       targeta += tar[i];
                     }
                   }
-                  leer_bmp280;
-                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura));
+                  if(bmp280.takeForcedMeasurement()){
+                    temperatura = bmp280.readTemperature();
+                  }
+                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, EstadoPuerta));
                   // Terminamos la lectura de la tarjeta  actual
-                  mfrc522.PICC_HaltA();  
-
+                  mfrc522.PICC_HaltA();
                   display.setTextSize(1);
                   display.setTextColor(WHITE);
-                  display.setCursor(0, 10);
-                  display.clearDisplay();
-                  if (targeta =="ab540d41"){
-                    display.println("\nUser: Pol");
+                  display.setCursor(0,0);
+
+                  display.print("\nUser: ");
+                  if(targeta == "ab540d41"){
+                    display.println("Pol");
                   }
                   else {
-                    display.println("\nUser: Unknown");
+                    display.println("Unknown");
                   }
-                  display.print("\n\nID: ");
-                  display.print(targeta);
-                  display.display();
+                  display.print("\nID: ");
+                  display.println(targeta);
 
-                  Serial.print(temperatura);
+                  display.display();
+                  display.clearDisplay();
             }      
 	}
 
+  if(EstadoPuerta) {
+    for(angle; angle < 180; angle++){
+      servo.write(angle);
+    }
+  }
+  else{
+    for(angle; angle > 60; angle--){
+      servo.write(angle);
+    }
+  }
 
   if (LedSectorAStat)
   {
-    digitalWrite(LEDA1pin, HIGH);
     digitalWrite(LEDA2pin, HIGH);
     digitalWrite(LEDA3pin, HIGH);
   }
   else
   {
-    digitalWrite(LEDA1pin, LOW);
     digitalWrite(LEDA2pin, LOW);
     digitalWrite(LEDA3pin, LOW);
   }
