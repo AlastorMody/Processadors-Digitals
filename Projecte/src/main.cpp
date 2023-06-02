@@ -109,6 +109,7 @@ String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, 
   ptr += "h5{font-size: 14px;color: #888;}\n";
   ptr += "h4{font-size: 16px; color #888; margin: 5px;}\n";
   ptr += "fieldset{text-align:center; color: black; border: solid 2px black;}\n";
+  ptr += "p{float: left; margin-left: 50px; margin-right: 85px}\n";
   ptr += "</style>\n";
   ptr += "</head>\n";
   ptr += "<body>\n";
@@ -116,8 +117,9 @@ String SendHTML(uint8_t LedSectorAStat, uint8_t LedSectorBStat, String targeta, 
    * Encabezados de la pagina
    */
   ptr += "<div id=\"header\">\n";
-  ptr += "<h1 align=\"center\">ESP32 Servidor WEB</h1>\n";
-  ptr += "<h3 align=\"center\">Usando Modo Estacion</h3>\n";
+  ptr += "<h1 align=\"center\">CASA</h1>\n";
+  ptr += "<p><img src='https://lh3.googleusercontent.com/pw/AJFCJaVRWDJ4j-uNPBZANBcSTnUMzGjy8XL_0FHzj2-MYRR84BwW8pwHITB4-7dNBoj447y7HJxkfEmZ4VCqEKb2bVHnsCc-FmXq3ihvwbLNWfplw9CtzA7vA-yp488In4wueKANCu_QaOPMhVJD_gxhE32g_GUgauTaUWOm0WAPWvLAP4iTnlLtjyF_4cH7PL8yyIloDnl6i8ZeFvLiEkCDU35OyjZZCtE1w3x47E14ETa_MOkPL9m--G6SjAok-lglPFc6Fxujw3qa1h-l60hTEWR-qKg_bIVZSud2_rilvHfVga_nGS9UI2JmSItL2JyHfpedtFbNZ7vYhPzYB54ODQKfjCG9_GBm7G1yrPO7ybw1hDWwgTIxYCAExBdif1ImiOb8D_w-4Ojs0dPB6eEVcLvaM6MoTRM43tasLwnc_kIdQAM4r9fAd16PTDXE5pZgA-HOtmnY3TRdfNJoQzoCIKmJAarTb0lCUwqgjrixBAGtuWBC7KOp-EX3dxSClI914Ju984z9a4cwXTOVRQIwHdLElkNTInW222f7mpBgbTkSmQBsfcxP-jaYxc1zUDZC-zu3P8h4UoDyFTB6WYR4jBm2ifWJAYl_ST1ya3Fd6ksfWpuJJXt3eW0nfzkDun8eSFm3MN37qZhRHyLJirS0PzHHrm5Vndcq70tg-hlQhQOnroL5F3KftlcEVMaonnyPkpJWpqEFwFuOKhVP66UkgV79MQ3h94ihZ7oPcBIlbsoMtb-haJ9wkGCK5JDZtfwumrduqQWbY18xXfHeViTIhOFg0jiDg1-GsFdQj_aaFNWS_dBx09EPKaAyBegGFE44xzDFxxn_QgeRD3J3R8M2ZyqbUDYMUetiJ8CsjxMk5rPTxHg8coroB5b7mpBCVFYvGvK0pHDOlVQ_=w1621-h933-s-no?authuser=0' width=\"600\" height=\"300\"></p>\n";
+  ptr += "<p><img src='https://lh3.googleusercontent.com/pw/AJFCJaXsi81TvsGtEWy91GqAYGXRzy7nhLSrEDwMfvfo2EfViuPNYj07y47e9fD5hOp2I09Xgywa6hnO4c1IUopY26w2-hSUFWVOmw_cW8WXm2WDnKVj5O_1-S0j0fRGZ15HYrGPFHu_lDf3Ow_qo1eJsJMaXdlwoOEkhPC3olpL013VmonB0qt0Ar8EsEmTMRbKVexJq4ZhmorziIV2eBxwWNCUeZ0OL1yeQQ6gyjYzj6GAbeGk_EyDFQ0dbPQ8cxkRhtGOlXHGEbTyZRte7iyVgp_uhElaynu9mkAsSLS_q8TKawCpIiofswkhu6CMc8HXkzTOpqaOU1z6PRBnMms5N7aeSKMv2YPtL_tL6QaR_5vlAyNJS1IbdHAMfnloYHi4NLdy83vFPO6uKZt-x7TZhYU5af4-FlMz6dx7xnu535Mqw9zTTfMQEpnc_scIT2SAsB3y60hHZP7L9nij1vRU0ECnpsaj9i1qcNa8NZD0VGR_iXiiqpXkVqfQ_sKyO_EgDJsf9IIiVAr9EENotx5fjM7wvFwWZkl4pEWo0F2NuZvcYMkm2kNBNAfsABxeGH3cJ7u2034-Hs7YmRbGgJJjLFI3FNugtAPh7v5E2oMKK53Lk8ypULKPoXApM2awIZr6-gY7KTzyCVkL6F3J_P4D-uCJjpwBM3hFKEBVnF9aAUoEDbit1wGFMEDHncY4t1DLCaH_Q4h_-YgOMNp48rh5t9m8pFyE5blKJ-Hqr1e-vhWIVoiX8co-aEtQyx7dCkKpXyde2pfbwA9d73UKzWsT165RbkCTY-b-2PCWUihWQTekXzGpDwHAcjYqUpXscymnysugwFC8febkE6l3JdDvTYYjnRq9M81B6IYY5STR2FkrhJurOBrhS4lOrGgxhoAOEcbEbr_7emGz=w1918-h933-s-no?authuser=0' width=\"600\" height=\"300\"></p>\n";
   ptr += "</div>\n";
 /*
  * Aqui esta la inteligencia del servidor WEB con ESP32, dependiento de los parametros de la funcion SendHTML
@@ -396,7 +398,6 @@ void loop() {
                   if(bmp280.takeForcedMeasurement()){
                     temperatura = bmp280.readTemperature();
                   }
-                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, EstadoPuerta));
                   // Terminamos la lectura de la tarjeta  actual
                   mfrc522.PICC_HaltA();
                   display.setTextSize(1);
@@ -406,10 +407,15 @@ void loop() {
                   display.print("\nUser: ");
                   if(targeta == "ab540d41"){
                     display.println("Pol");
+                    for(angle; angle < 180; angle++){
+                      servo.write(angle);
+                    }
+                    EstadoPuerta = HIGH;
                   }
                   else {
                     display.println("Unknown");
                   }
+                  server.send(200, "text/html", SendHTML(LedSectorAStat, LedSectorBStat, targeta, temperatura, EstadoPuerta));
                   display.print("\nID: ");
                   display.println(targeta);
 
